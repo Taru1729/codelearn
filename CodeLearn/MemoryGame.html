@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Code Syntax Memory Game</title>
+    <style>
+        .card {
+            width: 100px;
+            height: 100px;
+            background: #2d2d2d;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            transition: all 0.3s ease;
+            border: 2px solid #3d3d3d;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: "?";
+            position: absolute;
+            font-size: 2em;
+            color: #58a6ff;
+            transition: opacity 0.3s;
+        }
+
+        .card.revealed::before {
+            opacity: 0;
+        }
+
+        .symbol {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .name {
+            font-size: 0.7em;
+            text-align: center;
+            padding: 0 5px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            color: #d4d4d4;
+        }
+
+        .revealed .symbol,
+        .revealed .name {
+            opacity: 1;
+        }
+
+        #game-board {
+            max-width: 700px;
+            margin: 20px auto;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        #score {
+            text-align: center;
+            font-size: 24px;
+            margin: 20px;
+            color: #58a6ff;
+        }
+
+        #congratulations {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 20px;
+            color: #4CAF50;
+        }
+
+        #play-again {
+            display: block;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 18px;
+            color: #58a6ff;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        body {
+            background: #1a1a1a;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <center><h1>Code Syntax Memory Match</h1></center>
+    <div id="score">Matches Found: <span id="matchCount">0</span>/8</div>
+    <div id="game-board"></div>
+    <div id="congratulations"></div>
+    <div id="play-again" onclick="playAgain()" style="display: none;">Play Again</div>
+
+    <script>
+        const codeConcepts = [
+            { 
+                symbol: "{}",
+                name: "Curly Braces",
+                color: "#FFD700",
+                usage: "Object/Block Delimiters"
+            },
+            { 
+                symbol: "()",
+                name: "Parentheses",
+                color: "#FFA500",
+                usage: "Function Calls"
+            },
+            { 
+                symbol: "[]",
+                name: "Brackets",
+                color: "#4EC9B0",
+                usage: "Array Access"
+            },
+            { 
+                symbol: "<>",
+                name: "Angle Brackets",
+                color: "#569CD6",
+                usage: "Generics/JSX"
+            },
+            { 
+                symbol: "\"\"",
+                name: "Quotation Marks",
+                color: "#CE9178",
+                usage: "String Delimiters"
+            },
+            { 
+                symbol: ";",
+                name: "Semicolon",
+                color: "#9CDCFE",
+                usage: "Statement Terminator"
+            },
+            { 
+                symbol: "//",
+                name: "Double Slash",
+                color: "#6A9955",
+                usage: "Single-line Comment"
+            },
+            { 
+                symbol: "=>",
+                name: "Arrow",
+                color: "#C586C0",
+                usage: "Arrow Function"
+            }
+        ];
+
+        const cards = [...codeConcepts, ...codeConcepts];
+        let flippedCards = [];
+        let matchesFound = 0;
+
+        // Shuffle cards
+        cards.sort(() => Math.random() - 0.5);
+
+        // Create game board
+        const gameBoard = document.getElementById("game-board");
+        cards.forEach((concept, index) => {
+            const card = document.createElement("div");
+            card.className = "card";
+            card.dataset.symbol = concept.symbol;
+            
+            // Add symbol element
+            const symbol = document.createElement("div");
+            symbol.className = "symbol";
+            symbol.textContent = concept.symbol;
+            symbol.style.color = concept.color;
+            
+            // Add name element
+            const name = document.createElement("div");
+            name.className = "name";
+            name.textContent = concept.name;
+            
+            // Add usage element
+            const usage = document.createElement("div");
+            usage.className = "usage";
+            usage.textContent = concept.usage;
+            usage.style.display = "none"; // Hidden until matched
+            
+            card.appendChild(symbol);
+            card.appendChild(name);
+            card.appendChild(usage);
+            card.addEventListener("click", () => flipCard(card, concept));
+            gameBoard.appendChild(card);
+        });
+
+        function flipCard(card, concept) {
+            if (flippedCards.length < 2 && !flippedCards.includes(card)) {
+                card.classList.add("revealed");
+                flippedCards.push(card);
+
+                if (flippedCards.length === 2) {
+                    setTimeout(() => checkMatch(card, concept), 800);
+                }
+            }
+        }
+
+        function checkMatch() {
+            const [card1, card2] = flippedCards;
+            
+            if (card1.dataset.symbol === card2.dataset.symbol) {
+                // Show usage information on matched cards
+                card1.querySelector(".usage").style.display = "block";
+                card2.querySelector(".usage").style.display = "block";
+                
+                card1.style.borderColor = "#4CAF50";
+                card2.style.borderColor = "#4CAF50";
+                matchesFound++;
+                document.getElementById('matchCount').textContent = matchesFound;
+                checkGameOver();
+            } else {
+                card1.classList.remove("revealed");
+                card2.classList.remove("revealed");
+            }
+            flippedCards = [];
+        }
+
+        function checkGameOver() {
+            if (matchesFound === codeConcepts.length) {
+                setTimeout(() => {
+                    const congratulations = document.getElementById('congratulations');
+                    const playAgain = document.getElementById('play-again');
+                    congratulations.textContent = "🏆 Perfect Match! You've mastered code syntax!";
+                    playAgain.style.display = "block";
+                }, 100);
+            }
+        }
+
+        function playAgain() {
+            location.reload();
+        }
+    </script>
+</body>
+</html>

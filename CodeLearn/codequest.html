@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Code Quest Adventure</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+  body {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+    padding: 24px;
+    color: #f0f4f8;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  #game {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    max-width: 640px;
+    padding: 28px 32px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.75);
+    color: #f0f4f8;
+  }
+  h1 {
+    margin-top: 0;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-align: center;
+  }
+  #story {
+    font-size: 1.25rem;
+    margin-bottom: 28px;
+    line-height: 1.5;
+    min-height: 160px;
+    white-space: pre-wrap;
+  }
+  pre {
+    background: #222;
+    padding: 12px 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 1rem;
+    margin-bottom: 24px;
+    font-family: 'Courier New', monospace;
+  }
+  #choices {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  button.choice-btn {
+    background: #3b82f6;
+    border: none;
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-weight: 600;
+    color: #fff;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    user-select: none;
+  }
+  button.choice-btn:hover {
+    background: #2563eb;
+  }
+  .stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+  }
+  .inventory {
+    margin-top: 20px;
+    padding: 12px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+  }
+  .inventory-title {
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+  .correct {
+    color: #4CAF50;
+    font-weight: bold;
+  }
+  .incorrect {
+    color: #f44336;
+    font-weight: bold;
+  }
+  .feedback-message {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    animation: fadeIn 0.3s;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+  <div id="game" role="main" aria-label="Text-based coding adventure game">
+    <h1>Code Quest Adventure</h1>
+    <div class="stats">
+      <div>Score: <span id="score">0</span></div>
+    </div>
+    <div id="story"></div>
+    <pre id="code-snippet" style="display:none;"></pre>
+    <div id="choices" role="list"></div>
+    <div id="feedback" class="feedback-message" style="display:none;"></div>
+    <div class="inventory">
+      <div class="inventory-title">Skills Learned:</div>
+      <div id="inventory-items">None</div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const storyElem = document.getElementById('story');
+  const codeElem = document.getElementById('code-snippet');
+  const choicesElem = document.getElementById('choices');
+  const feedbackElem = document.getElementById('feedback');
+  const scoreDisplay = document.getElementById('score');
+  const inventoryDisplay = document.getElementById('inventory-items');
+
+  // Game state
+  const gameState = {
+    score: 0,
+    inventory: [],
+    hasDebuggingSkill: false,
+    hasAPISkill: false,
+    hasLoopSkill: false
+  };
+
+  function updateStats() {
+    scoreDisplay.textContent = gameState.score;
+  }
+
+  function addToInventory(item) {
+    if (!gameState.inventory.includes(item)) {
+      gameState.inventory.push(item);
+    }
+    inventoryDisplay.textContent = gameState.inventory.join(', ') || 'None';
+  }
+
+  function showFeedback(message, isCorrect) {
+    feedbackElem.textContent = message;
+    feedbackElem.className = isCorrect ? 'feedback-message correct' : 'feedback-message incorrect';
+    feedbackElem.style.display = 'block';
+    
+    // Hide after 2 seconds if it's a wrong answer
+    if (!isCorrect) {
+      setTimeout(() => {
+        feedbackElem.style.display = 'none';
+      }, 2000);
+    }
+  }
+
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
+  // Combined story data from both games
+  const storyData = {
+    start: {
+      text: `Welcome to CODE QUEST ADVENTURE!
+      
+You find yourself in a digital landscape where programming concepts come to life. 
+Your mission is to navigate through challenges while learning to code.
+
+Choose your starting path:`,
+      choices: [
+        { text: "Debug the crashing function (Learn debugging)", next: "debug_start" },
+        { text: "Investigate the API connection (Learn APIs)", next: "api_start" },
+        { text: "Fix the infinite loop (Learn loops)", next: "loop_start" },
+        { text: "Functions Challenge", next: "functions_1_intro" },
+        { text: "Conditionals Challenge", next: "conditionals_1_intro" },
+        { text: "Variables Challenge", next: "variables_1_intro" }
+      ]
+    },
+    
+    // Debugging path
+    debug_start: {
+      text: `🐞 DEBUGGING CHALLENGE 🐞
+      
+You encounter a function that keeps crashing with an error:
+"TypeError: Cannot read property 'price' of undefined"
+
+The code looks like this:`,
+      code: "function calculateTotal(items) {\n  let total = 0;\n  for (let i = 0; i <= items.length; i++) {\n    total += items[i].price;\n  }\n  return total;\n}",
+      choices: function() {
+        const choices = [
+          { text: "Add console.log() statements to inspect values", next: "debug_console" },
+          { text: "Read the error message carefully", next: "debug_error", feedback: "While reading error messages is important, in this case we need to inspect the values to understand why we're getting undefined!" }
+        ];
+        return shuffleArray(choices);
+      }
+    },
+    debug_console: {
+      text: `You add console.log() statements:
+
+console.log("Items length:", items.length);
+for (let i = 0; i <= items.length; i++) {
+  console.log("Item", i, ":", items[i]);
+  total += items[i].price;
+}
+
+The output shows:
+Items length: 2
+Item 0: {price: 10}
+Item 1: {price: 15}
+Item 2: undefined
+TypeError: Cannot read price of undefined
+
+What's the problem?`,
+      choices: function() {
+        const choices = [
+          { text: "The loop condition should be i < items.length", next: "debug_success" },
+          { text: "Need to check if items[i] exists before accessing price", next: "debug_alternative", feedback: "While this would work, there's a simpler solution - the loop is going one iteration too far!" }
+        ];
+        return shuffleArray(choices);
+      }
+    },
+    debug_success: {
+      text: `✅ Correct! The fixed code:
+
+for (let i = 0; i < items.length; i++) {
+  total += items[i].price;
+}
+
+The function now works perfectly! You've earned the DEBUGGING SKILL.
+
++50 Score`,
+      onEnter: function() {
+        gameState.score += 50;
+        gameState.hasDebuggingSkill = true;
+        updateStats();
+        addToInventory("Debugging Skill");
+      },
+      choices: [
+        { text: "Continue your adventure", next: "crossroads" }
+      ]
+    },
+    
+    // API path
+    api_start: {
+      text: `🌐 API CONNECTION CHALLENGE 🌐
+      
+Your fetch request to get user data keeps failing:`,
+      code: "fetch('https://api.example.com/data')\n  .then(response => response.json())\n  .catch(err => console.log(\"Error:\", err));",
+      choices: function() {
+        const choices = [
+          { text: "Verify the API endpoint URL is correct", next: "api_success" },
+          { text: "Check for CORS issues", next: "api_cors", feedback: "While CORS could be an issue, in this case the endpoint URL is completely wrong!" }
+        ];
+        return shuffleArray(choices);
+      }
+    },
+    api_success: {
+      text: `✅ Correct! The endpoint was wrong. You fixed it:`,
+      code: "fetch('https://correct.api/data')\n  .then(response => {\n    if (!response.ok) throw new Error('Error');\n    return response.json();\n  })",
+      onEnter: function() {
+        gameState.score += 50;
+        gameState.hasAPISkill = true;
+        updateStats();
+        addToInventory("API Skill");
+      },
+      choices: [
+        { text: "Continue your adventure", next: "crossroads" }
+      ]
+    },
+    
+    // Loop path
+    loop_start: {
+      text: `🔁 INFINITE LOOP CHALLENGE 🔁
+      
+This function never finishes executing:`,
+      code: "function countdown(n) {\n  while (n > 0) {\n    console.log(n);\n  }\n  console.log(\"Blastoff!\");\n}",
+      choices: function() {
+        const choices = [
+          { text: "Missing n-- to decrement the counter", next: "loop_success" },
+          { text: "Wrong condition (should be n >= 0)", next: "loop_fail", feedback: "The condition is correct - the problem is that n never changes!" }
+        ];
+        return shuffleArray(choices);
+      }
+    },
+    loop_success: {
+      text: `✅ Correct! Fixed version:`,
+      code: "function countdown(n) {\n  while (n > 0) {\n    console.log(n);\n    n--;\n  }\n  console.log(\"Blastoff!\");\n}",
+      onEnter: function() {
+        gameState.score += 50;
+        gameState.hasLoopSkill = true;
+        updateStats();
+        addToInventory("Loop Skill");
+      },
+      choices: [
+        { text: "Continue your adventure", next: "crossroads" }
+      ]
+    },
+    
+    // Crossroads after completing a path
+    crossroads: {
+      text: `You reach a crossroads in the digital landscape. 
+      
+From here you can choose another challenge.`,
+      choices: function() {
+        const choices = [];
+        
+        if (!gameState.hasDebuggingSkill) {
+          choices.push({ text: "Take the debugging path", next: "debug_start" });
+        }
+        if (!gameState.hasAPISkill) {
+          choices.push({ text: "Take the API path", next: "api_start" });
+        }
+        if (!gameState.hasLoopSkill) {
+          choices.push({ text: "Take the loops path", next: "loop_start" });
+        }
+        
+        choices.push(
+          { text: "Functions Challenge", next: "functions_1_intro" },
+          { text: "Conditionals Challenge", next: "conditionals_1_intro" },
+          { text: "Variables Challenge", next: "variables_1_intro" }
+        );
+        
+        if (gameState.hasDebuggingSkill && gameState.hasAPISkill && gameState.hasLoopSkill) {
+          choices.push({ text: "Face the final challenge", next: "final_boss" });
+        }
+        
+        return shuffleArray(choices);
+      }
+    },
+    
+    // Final boss
+    final_boss: {
+      text: `💻 FINAL CHALLENGE 💻
+      
+The Syntax Sorcerer appears! He throws a complex code snippet at you:`,
+      code: "async function processData(urls) {\n  const results = [];\n  for (const url of urls) {\n    try {\n      const response = await fetch(url);\n      const data = await response.json();\n      results.push(data);\n    } catch (err) {\n      console.error(`Failed to fetch ${url}`);\n      results.push(null);\n    }\n  }\n  return results.filter(x => x !== null);\n}",
+      choices: function() {
+        const choices = [
+          { text: "It processes URLs sequentially with error handling", next: "boss_success" },
+          { text: "It fetches multiple URLs in parallel", next: "boss_fail", feedback: "Incorrect! The 'for...of' loop with await processes URLs one at a time, not in parallel." }
+        ];
+        return shuffleArray(choices);
+      }
+    },
+    boss_success: {
+      text: `✅ CORRECT! You defeated the Syntax Sorcerer!
+
+The code processes an array of URLs sequentially:
+1. Fetches each URL one after another
+2. Handles errors for individual requests
+3. Returns only successful results
+
+You've mastered all coding challenges!
+
++100 Score`,
+      onEnter: function() {
+        gameState.score += 100;
+        updateStats();
+      },
+      choices: [
+        { text: "Play again", next: "start" }
+      ]
+    },
+
+    // Functions challenge
+    functions_1_intro: {
+      text: "Functions let you group code that performs a task.\n\nExample function:",
+      code: "function greet(name) {\n  return 'Hello ' + name + '!';\n}",
+      choices: [
+        { text: "What keyword declares a function?", next: "functions_1_question" }
+      ]
+    },
+    functions_1_question: {
+      text: "Which keyword is used to declare a function in JavaScript?",
+      choices: function() {
+        const choices = [
+          { text: "function", next: "functions_1_correct" },
+          { text: "func", next: "functions_1_incorrect", feedback: "Wrong answer! In JavaScript, the correct keyword is 'function'." }
+        ];
+        return shuffleArray(choices);
+      }
+    },
+    functions_1_correct: {
+      text: "Correct! The keyword is 'function'.\n\nNow, what does this function return when called as greet('Alice')?",
+      choices: function() {
+        const choices = [
+          { text: "'Hello Alice!'", next: "functions_2_intro" },
+          { text: "'name'", next: "functions_1_incorrect", feedback: "Incorrect! The function concatenates 'Hello ' with the name parameter and '!'." }
+        ];
+        return shuffleArray(choices);
+      }
+    },
+    functions_1_incorrect: {
+      text: "That's not quite right. Try again.",
+      choices: [
+        { text: "Back to question", next: "functions_1_question" }
+      ]
+    },
+    functions_2_intro: {
+      text: "Great! Let's write a function that adds two numbers.\n\nComplete the code:",
+      code: "function add(a, b) {\n  return __;\n}",
+      choices: function() {
+        const choices = [
+          { text: "a + b", next: "functions_2_correct" },
+          { text: "a - b", next: "functions_2_incorrect", feedback: "Wrong! That would subtract the numbers, not add them." }
+        ];
+        return shuffleArray(choices);
+      }
+    },
+    functions_2_correct: {
+      text: "Well done! The function returns the sum of a and b.\nYou completed the Functions Challenge!",
+      onEnter: function() {
+        gameState.score += 30;
+        updateStats();
+      },
+      choices: [
+        { text: "Back to main menu", next: "start" }
+      ]
+    },
+
+    // Conditionals challenge
+    conditionals_1_intro: {
+      text: "Conditionals let your code make decisions.\n\nExample:",
+      code: "if (score > 50) {\n  console.log('You win!');\n} else {\n  console.log('Try again');\n}",
+      choices: [
+        { text: "What keyword starts the condition?", next: "conditionals_1_question" }
+      ]
+    },
+    conditionals_1_question: {
+      text: "Which keyword tests a condition in JavaScript?",
+      choices: function() {
+        const choices = [
+          { text: "if", next: "conditionals_1_correct" },
+          { text: "for", next: "conditionals_1_incorrect", feedback: "Incorrect! 'for' is for loops, 'if' is for conditionals." }
+        ];
+        return shuffleArray(choices);
+      }
+    },
+    conditionals_1_correct: {
+      text: "Correct! 'if' tests a condition.\n\nWhat will be printed if score is 60?",
+      choices: function() {
+        const choices = [
+          { text: "'You win!'", next: "conditionals_2_intro" },
+          { text: "'Try again'", next: "conditionals_1_incorrect", feedback: "Wrong! 60 is greater than 50, so 'You win!' would be printed." }
+        ];
+        return shuffleArray(choices);
+      }
+    },
+    conditionals_2_intro: {
+      text: "Now fill in the blank:\n\nCheck if x is equal to 10.\n\nComplete the condition:",
+      code: "if (x __ 10) {\n  console.log('x is 10');\n}",
+      choices: function() {
+        const choices = [
+          { text: "==", next: "conditionals_2_correct" },
+          { text: "!=", next: "conditionals_2_incorrect", feedback: "Incorrect! '!=' means 'not equal'. We want to check for equality." }
+        ];
+        return shuffleArray(choices);
+      }
+    },
+    conditionals_2_correct: {
+      text: "Excellent! '==' checks equality.\nYou completed the Conditionals Challenge!",
+      onEnter: function() {
+        gameState.score += 30;
+        updateStats();
+      },
+      choices: [
+        { text: "Back to main menu", next: "start" }
+      ]
+    },
+
+    // Variables challenge
+    variables_1_intro: {
+      text: "Variables store data values.\n\nExample:",
+      code: "let age = 25;\nconst name = 'John';",
+      choices: [
+        { text: "What keyword declares a variable that can change?", next: "variables_1_question" }
+      ]
+    },
+    variables_1_question: {
+      text: "Which keyword declares a variable that can be reassigned?",
+      choices: function() {
+        const choices = [
+          { text: "let", next: "variables_1_correct" },
+          { text: "const", next: "variables_1_incorrect", feedback: "Incorrect! 'const' is for constants that can't be reassigned." }
+        ];
+        return shuffleArray(choices);
+      }
+    },
+    variables_1_correct: {
+      text: "Correct! 'let' declares a changeable variable.\n\nWhat happens if you try to reassign a 'const' variable?",
+      choices: function() {
+        const choices = [
+          { text: "Error - const variables can't be reassigned", next: "variables_2_intro" },
+          { text: "It works fine", next: "variables_1_incorrect", feedback: "Wrong! Trying to reassign a const variable throws an error." }
+        ];
+        return shuffleArray(choices);
+      }
+    },
+    variables_2_intro: {
+      text: "Correct! Constants cannot be reassigned.\n\nNow, what is the value of x after this code?",
+      code: "let x = 5;\nx = x + 10;",
+      choices: function() {
+        const choices = [
+          { text: "15", next: "variables_2_correct" },
+          { text: "5", next: "variables_2_incorrect", feedback: "Incorrect! x starts as 5, then 10 is added, making it 15." }
+        ];
+        return shuffleArray(choices);
+      }
+    },
+    variables_2_correct: {
+      text: "Excellent! x is now 15.\nYou completed the Variables Challenge!",
+      onEnter: function() {
+        gameState.score += 30;
+        updateStats();
+      },
+      choices: [
+        { text: "Back to main menu", next: "start" }
+      ]
+    }
+  };
+
+  function displayNode(key) {
+    const node = storyData[key];
+    storyElem.textContent = node.text;
+    
+    if (node.code) {
+      codeElem.style.display = "block";
+      codeElem.textContent = node.code;
+    } else {
+      codeElem.style.display = "none";
+    }
+    
+    choicesElem.innerHTML = "";
+    const choices = typeof node.choices === 'function' ? node.choices() : node.choices;
+    
+    choices.forEach(choice => {
+      const btn = document.createElement("button");
+      btn.className = "choice-btn";
+      btn.textContent = choice.text;
+      btn.addEventListener("click", () => {
+        if (choice.feedback) {
+          showFeedback(choice.feedback, false);
+        } else {
+          feedbackElem.style.display = "none";
+          if (node.onEnter) node.onEnter();
+          displayNode(choice.next);
+        }
+      });
+      choicesElem.appendChild(btn);
+    });
+  }
+
+  // Start game
+  displayNode("start");
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeLearn - About</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background-color: #0F172A;
+      color: #F8FAFC;
+    }
+
+    /* HEADER */
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 40px;
+      background-color: #1E293B;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo img {
+      width: 35px;
+    }
+
+    .logo span {
+      font-family: 'Poppins', sans-serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: #F8FAFC;
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+    }
+
+    nav ul li a {
+      color: #94A3B8;
+      margin-left: 25px;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+
+    nav ul li a:hover {
+      color: #6366F1;
+    }
+
+    /* MAIN */
+    main {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 60px 20px;
+    }
+
+    .about-card {
+      background-color: #1E293B;
+      padding: 40px;
+      border-radius: 16px;
+      max-width: 750px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    h1 {
+      font-family: 'Poppins', sans-serif;
+      color: #6366F1;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    h2 {
+      margin-top: 20px;
+      margin-bottom: 10px;
+      color: #22C55E;
+      font-size: 18px;
+    }
+
+    p {
+      color: #94A3B8;
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+
+    ul {
+      margin-top: 10px;
+      padding-left: 20px;
+    }
+
+    ul li {
+      margin-bottom: 8px;
+      color: #F8FAFC;
+    }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 20px;
+      background-color: #1E293B;
+      color: #94A3B8;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header class="toolbar">
+    <div class="logo">
+      <img src="logo.png" alt="CodeLearn Logo">
+      <span>CodeLearn</span>
+    </div>
+
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="login.html">Login</a></li>
+        <li><a href="about.html">About</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- MAIN -->
+  <main>
+    <div class="about-card">
+
+      <h1>About CodeLearn</h1>
+
+      <p><b>Welcome to CodeLearn — where coding meets fun!</b></p>
+
+      <p>
+        We believe that learning to code should be exciting, engaging, and accessible to everyone — 
+        whether you're a beginner or someone looking to sharpen your skills.
+      </p>
+
+      <h2>What We Do</h2>
+      <p>
+        CodeLearn transforms complex programming concepts into interactive mini-games, challenges, 
+        and quizzes that make learning feel like play.
+      </p>
+
+      <h2>Features</h2>
+      <ul>
+        <li>🎮 Interactive Coding Games</li>
+        <li>🧠 Logic Building Challenges</li>
+        <li>🚀 Beginner-Friendly Learning</li>
+        <li>⚡ Engaging and Fun Experience</li>
+      </ul>
+
+      <h2>Our Vision</h2>
+      <p>
+        To make coding simple, fun, and accessible for everyone by combining education with gamification.
+      </p>
+
+      <p><b>Code smarter. Play harder. Welcome to CodeLearn.</b></p>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>&copy; 2025 CodeLearn. All rights reserved.</p>
+  </footer>
+
+</body>
+</html>

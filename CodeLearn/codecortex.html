@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeCortex - CodeLearn</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #0a0a1a;
+            text-align: center;
+            padding: 20px;
+            color: #fff;
+        }
+
+        header {
+            background-color: #1a1a2e;
+            color: white;
+            padding: 15px 0;
+            border: 1px solid #00bfff;
+            box-shadow: 0 0 10px #00bfff;
+            margin-bottom: 30px;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        .question-box {
+            border: 1px solid #00bfff;
+            padding: 20px;
+            background: #1a1a2e;
+            display: inline-block;
+            margin: 20px auto;
+            width: 800px;
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        #question {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: white;
+            text-shadow: white;
+        }
+
+        .options {
+            text-align: left;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .options label {
+            font-size: 18px;
+            display: block;
+            margin: 10px 0;
+            cursor: pointer;
+            color: #fff;
+            transition: color 0.3s ease;
+        }
+
+        .options label:hover {
+            color: #00bfff;
+        }
+
+        .options input[type="radio"] {
+            margin-right: 10px;
+            accent-color: #00bfff;
+        }
+
+        button {
+            padding: 12px 25px;
+            font-size: 18px;
+            margin-top: 20px;
+            cursor: pointer;
+            background-color: #1a1a2e;
+            color: white;
+            border: 2px solid #00bfff;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            background-color: #00bfff;
+            color: #1a1a2e;
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.5);
+        }
+
+        .error {
+            color: #ff4d4d;
+            margin-top: 10px;
+            text-shadow: 0 0 5px rgba(255, 77, 77, 0.5);
+        }
+
+        .explanation {
+            margin-top: 20px;
+            color: #00ff9d;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(0, 255, 157, 0.3);
+        }
+
+        pre {
+            background-color: #0d1117;
+            border: 1px solid #00bfff;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+            color: #e6e6e6;
+            text-align: left;
+            box-shadow: inset 0 0 10px rgba(0, 191, 255, 0.2);
+        }
+
+        code {
+            font-family: 'Courier New', monospace;
+            color: #00ff9d;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Welcome to CodeCortex 🧠</h1>
+    </header>
+    <main>
+        <div id="game-container">
+            <div class="question-box" id="question-box">
+                <p id="question">Welcome to CodeCortex! Click Start Game to begin.</p>
+                <form id="answer-form" style="display:none;">
+                    <div class="options" id="options"></div></br>
+                    <button type="submit">Submit</button>
+                </form>
+                <button id="start-game-button">Start Game</button>
+                <p class="error" id="error-message"></p>
+                <p class="explanation" id="explanation" style="display: none;"></p>
+            </div>
+        </div>
+    </main>
+    <script>
+        const challenges = [
+            {
+                question: `Python\n\n<pre><code>def func(nums):\n    nums.append([4, 5])\n    return nums\n\na = [1, 2, 3]\nb = func(a)\nprint(len(b))</code></pre>`,
+                options: ["A) 3", "B) 4", "C) 5", "D) Error"],
+                answer: "B) 4",
+                explanation: "The .append() method adds a single item (in this case, a list) to the end. So [1, 2, 3] becomes [1, 2, 3, [4, 5]], hence len(b) is 4."
+            },
+            {
+                question: `Java\n\n<pre><code>public class Test {\n    public static void main(String[] args) {\n        int x = 5;\n        int y = ++x * 2;\n        System.out.println(y);\n    }\n}</code></pre>`,
+                options: ["A) 10", "B) 11", "C) 12", "D) 6"],
+                answer: "C) 12",
+                explanation: "++x increments x before it's used. So, x = 6, then y = 6 * 2 = 12."
+            },
+            {
+                question: `C\n\n<pre><code>#include <stdio.h>\nint main() {\n    int a = 10;\n    printf(\"%d\", a++);\n    return 0;\n}</code></pre>`,
+                options: ["A) 10", "B) 11", "C) Error", "D) Undefined"],
+                answer: "A) 10",
+                explanation: "a++ prints the value first, then increments. So it prints 10, but a becomes 11 after."
+            },
+            {
+                question: `JavaScript\n\n<pre><code>let a = [1, 2, 3];\nlet b = a;\nb.push(4);\nconsole.log(a);</code></pre>`,
+                options: ["A) [1, 2, 3]", "B) [1, 2, 3, 4]", "C) Error", "D) [4]"],
+                answer: "B) [1, 2, 3, 4]",
+                explanation: "a and b refer to the same array. Changing b affects a."
+            },
+            {
+                question: `Python (Tricky Logic)\n\n<pre><code>x = "True"\ny = True\nprint(x == y)</code></pre>`,
+                options: ["A) True", "B) False", "C) Error", "D) None"],
+                answer: "B) False",
+                explanation: "x is a string \"True\", and y is a Boolean True. They're not the same type."
+            }
+        ];
+
+        let currentLevel = 0;
+
+        const questionElement = document.getElementById("question");
+        const optionsElement = document.getElementById("options");
+        const startGameButton = document.getElementById("start-game-button");
+        const errorMessage = document.getElementById("error-message");
+        const explanationElement = document.getElementById("explanation");
+        const answerForm = document.getElementById("answer-form");
+
+        function startGame() {
+            currentLevel = 0;
+            startGameButton.style.display = "none";
+            answerForm.style.display = "block";
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentLevel < challenges.length) {
+                const challenge = challenges[currentLevel];
+                questionElement.innerHTML = challenge.question;
+                optionsElement.innerHTML = "";
+                explanationElement.style.display = "none";
+
+                challenge.options.forEach((option, index) => {
+                    const label = document.createElement("label");
+                    const radio = document.createElement("input");
+                    radio.type = "radio";
+                    radio.name = "option";
+                    radio.value = option;
+                    label.appendChild(radio);
+                    label.appendChild(document.createTextNode(option));
+                    optionsElement.appendChild(label);
+                });
+
+                errorMessage.textContent = "";
+            } else {
+                endGame();
+            }
+        }
+
+        function checkAnswer(selectedOption) {
+            const challenge = challenges[currentLevel];
+
+            if (selectedOption === challenge.answer) {
+                explanationElement.style.display = "block";
+                explanationElement.textContent = `✅ ${challenge.explanation}`;
+                currentLevel++;
+                setTimeout(loadQuestion, 3000);
+            } else {
+                errorMessage.textContent = "❌ Incorrect answer. Try again!";
+            }
+        }
+
+        answerForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            const selectedOption = document.querySelector('input[name="option"]:checked');
+            if (selectedOption) {
+                checkAnswer(selectedOption.value);
+            } else {
+                errorMessage.textContent = "Please select an option.";
+            }
+        });
+
+        function endGame() {
+            questionElement.textContent = "🎉 Congratulations! You completed CodeCortex! 🎉";
+            optionsElement.style.display = "none";
+            answerForm.style.display = "none"; // Ensure the form is hidden
+            startGameButton.textContent = "Play Again";
+            startGameButton.style.display = "block";
+            explanationElement.style.display = "none";
+        }
+
+        startGameButton.addEventListener("click", startGame);
+    </script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Learn Coding with Tic-Tac-Toe</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background: linear-gradient(135deg, #0a192f 0%, #112240 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    h1 {
+      color: #64ffda;
+      text-align: center;
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(100, 255, 218, 0.2);
+    }
+
+    #board {
+      display: grid;
+      grid-template-columns: repeat(3, 80px);
+      gap: 10px;
+      margin: 30px auto;
+      padding: 20px;
+      align-items: center;
+      justify-content: center;
+      background: rgba(26, 54, 93, 0.3);
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(100, 255, 218, 0.1);
+    }
+
+    .cell {
+      width: 80px;
+      height: 80px;
+      border: none;
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 32px;
+      font-weight: bold;
+      cursor: pointer;
+      background: linear-gradient(145deg, #233554, #1a365d);
+      box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      color: #64ffda;
+    }
+
+    .cell:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(100, 255, 218, 0.3);
+    }
+
+    #code-input {
+      width: 300px;
+      padding: 15px;
+      margin: 20px 0;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      background: #233554;
+      color: #e6f1ff;
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    #code-input:focus {
+      outline: none;
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2), 0 0 0 3px rgba(100, 255, 218, 0.3);
+    }
+
+    button {
+      padding: 12px 25px;
+      font-size: 1.1em;
+      background: linear-gradient(135deg, #64ffda 0%, #48ceb0 100%);
+      color: #0a192f;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(100, 255, 218, 0.3);
+      transition: all 0.3s ease;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 7px 20px rgba(100, 255, 218, 0.4);
+    }
+
+    #status {
+      margin: 20px 0;
+      padding: 15px 25px;
+      background: rgba(100, 255, 218, 0.1);
+      border-radius: 10px;
+      border-left: 5px solid #64ffda;
+      color: #e6f1ff;
+      font-weight: 500;
+    }
+
+    #lesson {
+      margin: 30px;
+      padding: 20px;
+      background: #233554;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      color: #e6f1ff;
+      font-size: 1.2em;
+      line-height: 1.6;
+    }
+
+    #play-again {
+      display: none;
+      padding: 15px 30px;
+      font-size: 1.2em;
+      background: linear-gradient(135deg, #64ffda 0%, #48ceb0 100%);
+      color: #0a192f;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(100, 255, 218, 0.3);
+      transition: all 0.3s ease;
+      margin-top: 20px;
+      animation: popIn 0.5s ease-out;
+    }
+
+    #play-again:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 7px 20px rgba(100, 255, 218, 0.4);
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Learn Coding with Tic-Tac-Toe!</h1>
+
+  <div id="board"></div>
+  <input type="text" id="code-input" placeholder="Enter your code (e.g., board[0] = 'X')">
+  <button onclick="executeCode()">Run Code</button>
+  <p id="status">Player X's turn. Assign a cell (0-8) to 'X'.</p>
+  <div id="lesson">
+    <h2>Lesson: Arrays and Indices</h2>
+    <p id="array-display">
+      Current board array: <code>["", "", "", "", "", "", "", "", ""]</code>
+    </p>
+    <p>
+      <code>board[0] = 'X';</code> will place an <code>'X'</code> in the first cell.
+    </p>
+  </div>
+  <button id="play-again" onclick="resetGame()">Play Again!</button>
+
+  <script>
+    let board = ["", "", "", "", "", "", "", "", ""];
+    let currentPlayer = "X";
+
+    const boardElement = document.getElementById("board");
+    const statusDisplay = document.getElementById("status");
+    const playAgainButton = document.getElementById("play-again");
+    const arrayDisplay = document.getElementById("array-display");
+
+    // Initialize the board
+    for (let i = 0; i < 9; i++) {
+      const cell = document.createElement("div");
+      cell.className = "cell";
+      cell.dataset.index = i;
+      boardElement.appendChild(cell);
+    }
+
+    function executeCode() {
+      const code = document.getElementById("code-input").value.trim();
+      const index = getIndexFromCode(code);
+
+      if (index === null || index < 0 || index > 8) {
+        statusDisplay.textContent = "❌ Invalid code! Use: board[index] = 'X' (index 0-8)";
+        return;
+      }
+
+      if (board[index] !== "") {
+        statusDisplay.textContent = "❌ Cell already taken!";
+        return;
+      }
+
+      board[index] = currentPlayer;
+      document.querySelector(`[data-index="${index}"]`).textContent = currentPlayer;
+
+      // Update the board array in the lesson
+      updateArray();
+
+      if (checkWin()) {
+        statusDisplay.textContent = `🎉 Player ${currentPlayer} wins!`;
+        playAgainButton.style.display = "block";
+        return;
+      }
+
+      if (checkDraw()) {
+        statusDisplay.textContent = "🤝 It's a draw!";
+        playAgainButton.style.display = "block";
+        return;
+      }
+
+      currentPlayer = currentPlayer === "X" ? "O" : "X";
+      statusDisplay.textContent = `Player ${currentPlayer}'s turn.`;
+    }
+
+    function getIndexFromCode(code) {
+      const match = code.match(/board\[(\d+)\]\s*=\s*'[XO]'/);
+      return match ? parseInt(match[1]) : null;
+    }
+
+    function checkWin() {
+      const winPatterns = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+        [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+        [0, 4, 8], [2, 4, 6]             // Diagonals
+      ];
+      return winPatterns.some(pattern =>
+        pattern.every(index => board[index] === currentPlayer)
+      );
+    }
+
+    function checkDraw() {
+      return board.every(cell => cell !== "");
+    }
+
+    function resetGame() {
+      board = ["", "", "", "", "", "", "", "", ""];
+      currentPlayer = "X";
+      document.querySelectorAll(".cell").forEach(cell => cell.textContent = "");
+      statusDisplay.textContent = "Player X's turn. Assign a cell (0-8) to 'X'.";
+      playAgainButton.style.display = "none";
+      document.getElementById("code-input").value = "";
+      updateArray(); // Reset the displayed array
+    }
+
+    function updateArray() {
+      arrayDisplay.innerHTML = `Current board array: <code>${JSON.stringify(board)}</code>`;
+    }
+
+    // Initialize the array display
+    updateArray();
+  </script>
+</body>
+</html>

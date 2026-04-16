@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logic Gate Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #0a192f; /* Dark navy blue background */
+            color: #e6f1ff; /* Bright white text */
+        }
+
+        #game-container {
+            width: 800px;
+            margin: 20px;
+            padding: 20px;
+            background-color: #112240; /* Slightly lighter navy blue */
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(100, 255, 218, 0.2);
+            color: #e6f1ff;
+        }
+
+        #circuit-board {
+            width: 100%;
+            height: 400px;
+            border: 2px solid #64ffda; /* Neon green border */
+            position: relative;
+            margin: 20px 0;
+            background-color: #1a365d; /* Deep navy blue */
+        }
+
+        .gate-options {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .gate {
+            width: 80px;
+            height: 50px;
+            border: 2px solid #64ffda; /* Neon green border */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: move;
+            background-color: #233554; /* Medium navy blue */
+            color: #e6f1ff;
+            user-select: none;
+            transition: all 0.3s ease;
+        }
+
+        .gate:hover {
+            box-shadow: 0 0 10px #64ffda; /* Neon green glow on hover */
+        }
+
+        .gate.draggable {
+            cursor: move;
+        }
+
+        .gate.empty {
+            border: 2px dashed #64ffda;
+            background-color: #1a365d;
+        }
+
+        .input, .output {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #64ffda;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            background-color: #233554;
+            color: #e6f1ff;
+            border-radius: 50%;
+        }
+
+        .wire-horizontal {
+            position: absolute;
+            background-color: #64ffda; /* Neon green wires */
+            height: 2px;
+            box-shadow: 0 0 5px #64ffda;
+        }
+
+        .wire-vertical {
+            position: absolute;
+            background-color: #64ffda; /* Neon green wires */
+            width: 2px;
+            box-shadow: 0 0 5px #64ffda;
+        }
+
+        #message {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .correct {
+            background-color: #64ffda; /* Neon green for correct */
+            color: #0a192f;
+        }
+
+        .incorrect {
+            background-color: #ff6b6b; /* Neon red for incorrect */
+            color: #e6f1ff;
+        }
+
+        #level-info {
+            text-align: center;
+            margin: 10px 0;
+            font-size: 1.2em;
+            color: #e6f1ff;
+        }
+
+        #check-button, #next-button, #play-again {
+            padding: 10px 20px;
+            font-size: 1.1em;
+            cursor: pointer;
+            background-color: #64ffda;
+            color: #0a192f;
+            border: none;
+            border-radius: 5px;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+
+        #check-button:hover, #next-button:hover, #play-again:hover {
+            box-shadow: 0 0 15px #64ffda;
+            transform: translateY(-2px);
+        }
+
+        #check-button:disabled, #next-button:disabled {
+            background-color: #233554;
+            color: #8892b0;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Logic Gate Puzzle</h1>
+        <div id="level-info">Level 1</div>
+        <div id="circuit-board"></div>
+        <div class="gate-options" id="gate-options"></div>
+        <div id="message"></div>
+        <button id="check-button">Check Answer</button>
+        <button id="next-button" class="hidden">Next Level</button>
+        <button id="play-again" class="hidden">Play Again</button>
+    </div>
+
+    <script>
+        const levels = [
+            {
+                inputs: [{value: 1, x: 50, y: 100}, {value: 0, x: 50, y: 250}],
+                output: {value: 1, x: 700, y: 175},
+                emptyGate: {x: 300, y: 175},
+                options: ['AND', 'OR', 'NOT'],
+                correct: 'OR',
+                description: 'Complete the circuit to make the output 1'
+            },
+            {
+                inputs: [{value: 1, x: 50, y: 100}, {value: 1, x: 50, y: 250}],
+                output: {value: 1, x: 700, y: 175},
+                emptyGate: {x: 300, y: 175},
+                options: ['AND', 'OR', 'NOT'],
+                correct: 'AND',
+                description: 'Make the output 1 when both inputs are 1'
+            },
+            {
+                inputs: [{value: 1, x: 50, y: 175}],
+                output: {value: 0, x: 700, y: 175},
+                emptyGate: {x: 300, y: 175},
+                options: ['AND', 'OR', 'NOT'],
+                correct: 'NOT',
+                description: 'Invert the input signal'
+            },
+            {
+                inputs: [{value: 1, x: 50, y: 100}, {value: 0, x: 50, y: 250}],
+                output: {value: 0, x: 700, y: 175},
+                emptyGate: {x: 300, y: 175},
+                options: ['NAND', 'NOR', 'XOR'],
+                correct: 'NAND',
+                description: 'Output should be 0 when at least one input is 0'
+            },
+            {
+                inputs: [{value: 1, x: 50, y: 100}, {value: 1, x: 50, y: 250}],
+                output: {value: 0, x: 700, y: 175},
+                emptyGate: {x: 300, y: 175},
+                options: ['NAND', 'NOR', 'XOR'],
+                correct: 'NOR',
+                description: 'Output should be 0 when any input is 1'
+            },
+            {
+                inputs: [{value: 1, x: 50, y: 100}, {value: 0, x: 50, y: 250}],
+                output: {value: 1, x: 700, y: 175},
+                emptyGate: {x: 300, y: 175},
+                options: ['NAND', 'NOR', 'XOR'],
+                correct: 'XOR',
+                description: 'Output should be 1 when inputs are different'
+            },
+            {
+                inputs: [{value: 1, x: 50, y: 100}, {value: 0, x: 50, y: 175}, {value: 1, x: 50, y: 250}],
+                output: {value: 1, x: 700, y: 175},
+                emptyGate: {x: 300, y: 175},
+                options: ['AND', 'OR', 'XOR'],
+                correct: 'OR',
+                description: 'Output should be 1 when at least one input is 1'
+            },
+            {
+                inputs: [{value: 1, x: 50, y: 100}, {value: 0, x: 50, y: 175}, {value: 1, x: 50, y: 250}],
+                output: {value: 0, x: 700, y: 175},
+                emptyGate: {x: 300, y: 175},
+                options: ['AND', 'NAND', 'NOR'],
+                correct: 'AND',
+                description: 'Output should be 0 when any input is 0'
+            }
+        ];
+
+        let currentLevel = 0;
+        let selectedGate = null;
+
+        function initializeLevel(level) {
+            const circuitBoard = document.getElementById('circuit-board');
+            const gateOptions = document.getElementById('gate-options');
+            const levelInfo = document.getElementById('level-info');
+
+            // Clear previous level
+            circuitBoard.innerHTML = '';
+            gateOptions.innerHTML = '';
+            document.getElementById('message').innerHTML = '';
+            document.getElementById('message').className = '';
+
+            // Set level info
+            levelInfo.textContent = `Level ${currentLevel + 1}: ${level.description}`;
+
+            // Add inputs
+            level.inputs.forEach(input => {
+                const inputElement = document.createElement('div');
+                inputElement.className = 'input';
+                inputElement.textContent = input.value;
+                inputElement.style.left = input.x + 'px';
+                inputElement.style.top = input.y + 'px';
+                circuitBoard.appendChild(inputElement);
+
+                // Add horizontal wire from input to vertical connection point
+                const horizontalWire = document.createElement('div');
+                horizontalWire.className = 'wire-horizontal';
+                horizontalWire.style.left = (input.x + 40) + 'px';
+                horizontalWire.style.top = (input.y + 20) + 'px';
+                horizontalWire.style.width = (level.emptyGate.x - 50 - input.x - 40) + 'px';
+                circuitBoard.appendChild(horizontalWire);
+
+                // Add vertical wire to connect to gate
+                const verticalWire = document.createElement('div');
+                verticalWire.className = 'wire-vertical';
+                verticalWire.style.left = (level.emptyGate.x - 50) + 'px';
+                verticalWire.style.top = Math.min(input.y + 20, level.emptyGate.y + 25) + 'px';
+                verticalWire.style.height = Math.abs(input.y + 20 - (level.emptyGate.y + 25)) + 'px';
+                circuitBoard.appendChild(verticalWire);
+            });
+
+            // Add output
+            const outputElement = document.createElement('div');
+            outputElement.className = 'output';
+            outputElement.textContent = level.output.value;
+            outputElement.style.left = level.output.x + 'px';
+            outputElement.style.top = level.output.y + 'px';
+            circuitBoard.appendChild(outputElement);
+
+            // Add horizontal wire from gate to output
+            const outputWire = document.createElement('div');
+            outputWire.className = 'wire-horizontal';
+            outputWire.style.left = (level.emptyGate.x + 80) + 'px';
+            outputWire.style.top = (level.output.y + 20) + 'px';
+            outputWire.style.width = (level.output.x - level.emptyGate.x - 80) + 'px';
+            circuitBoard.appendChild(outputWire);
+
+            // Add empty gate placeholder
+            const emptyGate = document.createElement('div');
+            emptyGate.className = 'gate empty';
+            emptyGate.style.position = 'absolute';
+            emptyGate.style.left = level.emptyGate.x + 'px';
+            emptyGate.style.top = level.emptyGate.y + 'px';
+            emptyGate.textContent = '?';
+            circuitBoard.appendChild(emptyGate);
+
+            // Add vertical wire from connection point to gate
+            const gateVerticalWire = document.createElement('div');
+            gateVerticalWire.className = 'wire-vertical';
+            gateVerticalWire.style.left = (level.emptyGate.x - 50) + 'px';
+            gateVerticalWire.style.top = (level.emptyGate.y + 25) + 'px';
+            gateVerticalWire.style.height = '2px';
+            circuitBoard.appendChild(gateVerticalWire);
+
+            // Add horizontal wire to connect vertical wires to gate
+            const gateHorizontalWire = document.createElement('div');
+            gateHorizontalWire.className = 'wire-horizontal';
+            gateHorizontalWire.style.left = (level.emptyGate.x - 50) + 'px';
+            gateHorizontalWire.style.top = (level.emptyGate.y + 25) + 'px';
+            gateHorizontalWire.style.width = '50px';
+            circuitBoard.appendChild(gateHorizontalWire);
+
+            // Add gate options
+            level.options.forEach(option => {
+                const gate = document.createElement('div');
+                gate.className = 'gate draggable';
+                gate.textContent = option;
+                gate.draggable = true;
+                gate.addEventListener('dragstart', handleDragStart);
+                gateOptions.appendChild(gate);
+            });
+
+            // Add drop zone event listeners
+            emptyGate.addEventListener('dragover', handleDragOver);
+            emptyGate.addEventListener('drop', handleDrop);
+        }
+
+        function handleDragStart(e) {
+            selectedGate = e.target.textContent;
+            e.dataTransfer.setData('text/plain', e.target.textContent);
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const gate = e.dataTransfer.getData('text/plain');
+            e.target.textContent = gate;
+            e.target.className = 'gate';
+            e.target.style.position = 'absolute';
+        }
+
+        function checkAnswer() {
+            const emptyGate = document.querySelector('.gate:not(.draggable)');
+            const message = document.getElementById('message');
+            const nextButton = document.getElementById('next-button');
+            const checkButton = document.getElementById('check-button');
+            const playAgainButton = document.getElementById('play-again');
+
+            if (emptyGate.textContent === levels[currentLevel].correct) {
+                message.textContent = 'Correct! Well done!';
+                message.className = 'correct';
+                checkButton.disabled = true;
+
+                if (currentLevel < levels.length - 1) {
+                    nextButton.classList.remove('hidden');
+                } else {
+                    message.textContent = 'Congratulations! You\'ve completed all levels!';
+                    playAgainButton.classList.remove('hidden');
+                }
+            } else {
+                message.textContent = 'Incorrect. Try again!';
+                message.className = 'incorrect';
+                emptyGate.textContent = '?';
+                emptyGate.className = 'gate empty';
+            }
+        }
+
+        function nextLevel() {
+            currentLevel++;
+            document.getElementById('next-button').classList.add('hidden');
+            document.getElementById('check-button').disabled = false;
+            initializeLevel(levels[currentLevel]);
+        }
+
+        function playAgain() {
+            currentLevel = 0;
+            document.getElementById('play-again').classList.add('hidden');
+            document.getElementById('check-button').disabled = false;
+            initializeLevel(levels[currentLevel]);
+        }
+
+        // Initialize game
+        document.getElementById('check-button').addEventListener('click', checkAnswer);
+        document.getElementById('next-button').addEventListener('click', nextLevel);
+        document.getElementById('play-again').addEventListener('click', playAgain);
+        initializeLevel(levels[currentLevel]);
+    </script>
+</body>
+</html>

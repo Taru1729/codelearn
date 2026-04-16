@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snippet Sorter</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* General Styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e1e2f;
+            color: white;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        header {
+            background-color: #333;
+            padding: 10px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        .game-container {
+            border-radius: 10px;
+            padding: 20px;
+            background: #282a36;
+            border: 2px solid #444;
+            width: 90%;
+            max-width: 800px;
+            margin: 20px auto;
+        }
+
+        .instructions {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .snippet-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .snippet {
+            background: #1e1e2f;
+            color: #66d9ef;
+            padding: 10px;
+            border: 1px solid #444;
+            border-radius: 5px;
+            cursor: move;
+            font-family: "Courier New", Courier, monospace;
+        }
+
+        .snippet.correct {
+            background-color: #5cdb95;
+            color: black;
+            border: 1px solid #4caf50;
+        }
+
+        .snippet.incorrect {
+            background-color: #ff6f61;
+            color: white;
+            border: 1px solid #ff4a3c;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #5cdb95;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: #1e1e2f;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #53c683;
+        }
+
+        .success {
+            color: #5cdb95;
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        .error {
+            color: #ff6f61;
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        footer {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <header>Snippet Sorter</header>
+    <main>
+        <h1>Welcome to Snippet Sorter!</h1>
+        <p class="instructions">Drag and drop the snippets below to arrange them in the correct logical sequence. Once you're done, click "Check Solution".</p>
+
+        <!-- Question 1 -->
+        <div class="game-container" id="question-1">
+            <h2>Question 1: (Python) Calculate Factorial</h2>
+            <p><strong>Description:</strong> Arrange the following Python code snippets to calculate the factorial of a number. Ensure the program is logically correct.</p>
+            <div id="snippet-container-1" class="snippet-list">
+                <div class="snippet" draggable="true" data-order="5">    return result</div>
+                <div class="snippet" draggable="true" data-order="3">    for i in range(1, n + 1):</div>
+                <div class="snippet" draggable="true" data-order="4">        result = result * i</div>
+                <div class="snippet" draggable="true" data-order="2">    result = 1</div>
+                <div class="snippet" draggable="true" data-order="1">def factorial(n):</div>
+            </div>
+            <button onclick="checkSolution('snippet-container-1', [1, 2, 3, 4, 5])">Check Solution</button>
+            <p id="feedback-1" class="success" style="display: none;">🎉 Correct! You arranged the snippets in the correct order! 🎉</p>
+            <p id="feedback-error-1" class="error" style="display: none;">Oops! The sequence is incorrect. Try again!</p>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="game-container" id="question-2">
+            <h2>Question 2: (JavaScript) Print Even Numbers</h2>
+            <p><strong>Description:</strong> Arrange the following JavaScript snippets to print all even numbers from 1 to 10.</p>
+            <div id="snippet-container-2" class="snippet-list">
+                <div class="snippet" draggable="true" data-order="2">    if (i % 2 === 0) {</div>
+                <div class="snippet" draggable="true" data-order="1">for (let i = 1; i <= 10; i++) {</div>
+                <div class="snippet" draggable="true" data-order="4">    }</div>
+                <div class="snippet" draggable="true" data-order="3">        console.log(i);</div>
+                <div class="snippet" draggable="true" data-order="5">}</div>
+            </div>
+            <button onclick="checkSolution('snippet-container-2', [1, 2, 3, 4, 5])">Check Solution</button>
+            <p id="feedback-2" class="success" style="display: none;">🎉 Correct! You arranged the snippets in the correct order! 🎉</p>
+            <p id="feedback-error-2" class="error" style="display: none;">Oops! The sequence is incorrect. Try again!</p>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="game-container" id="question-3">
+            <h2>Question 3: (SQL) Select All Users</h2>
+            <p><strong>Description:</strong> Arrange the following SQL snippets to create a query that selects all users from a table named <code>users</code>.</p>
+            <div id="snippet-container-3" class="snippet-list">
+                <div class="snippet" draggable="true" data-order="3">FROM users;</div>
+                <div class="snippet" draggable="true" data-order="1">SELECT *</div>
+                <div class="snippet" draggable="true" data-order="2">WHERE active = 1</div>
+            </div>
+            <button onclick="checkSolution('snippet-container-3', [1, 3, 2])">Check Solution</button>
+            <p id="feedback-3" class="success" style="display: none;">🎉 Correct! You arranged the snippets in the correct order! 🎉</p>
+            <p id="feedback-error-3" class="error" style="display: none;">Oops! The sequence is incorrect. Try again!</p>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="game-container" id="question-4">
+            <h2>Question 4: (Java) Print Hello World</h2>
+            <p><strong>Description:</strong> Arrange the following Java snippets to create a program that prints "Hello, World!" to the console.</p>
+            <div id="snippet-container-4" class="snippet-list">
+                <div class="snippet" draggable="true" data-order="4">        System.out.println("Hello, World!");</div>
+                <div class="snippet" draggable="true" data-order="1">public class HelloWorld {</div>
+                <div class="snippet" draggable="true" data-order="2">    public static void main(String[] args) {</div>
+                <div class="snippet" draggable="true" data-order="3">    }</div>
+                <div class="snippet" draggable="true" data-order="5">}</div>
+            </div>
+            <button onclick="checkSolution('snippet-container-4', [1, 2, 4, 3, 5])">Check Solution</button>
+            <p id="feedback-4" class="success" style="display: none;">🎉 Correct! You arranged the snippets in the correct order! 🎉</p>
+            <p id="feedback-error-4" class="error" style="display: none;">Oops! The sequence is incorrect. Try again!</p>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="game-container" id="question-5">
+    <h2>Question 5: (HTML) Create a Simple Web Page</h2>
+    <p><strong>Description:</strong> Arrange the following HTML snippets to create a simple webpage with a title and heading.</p>
+    <div id="snippet-container-5" class="snippet-list">
+        <div class="snippet" draggable="true" data-order="7">&lt;h1&gt;Hello, World!&lt;/h1&gt;</div>
+        <div class="snippet" draggable="true" data-order="3">&lt;head&gt;</div>
+        <div class="snippet" draggable="true" data-order="6">&lt;body&gt;</div>
+        <div class="snippet" draggable="true" data-order="1">&lt;!DOCTYPE html&gt;</div>
+        <div class="snippet" draggable="true" data-order="5">&lt;/head&gt;</div>
+        <div class="snippet" draggable="true" data-order="2">&lt;html&gt;</div>
+        <div class="snippet" draggable="true" data-order="9">&lt;/html&gt;</div>
+        <div class="snippet" draggable="true" data-order="4">&lt;title&gt;My Web Page&lt;/title&gt;</div>
+        <div class="snippet" draggable="true" data-order="8">&lt;/body&gt;</div>
+    </div>
+    <button onclick="checkSolution('snippet-container-5', [1, 2, 3, 4, 5, 6, 7, 8, 9])">Check Solution</button>
+    <p id="feedback-5" class="success" style="display: none;">🎉 Correct! You arranged the snippets in the correct order! 🎉</p>
+    <p id="feedback-error-5" class="error" style="display: none;">Oops! The sequence is incorrect. Try again!</p>
+</div>
+    </main>
+    <footer>&copy; 2025 CodeLearn. All rights reserved.</footer>
+
+    <script>
+        let draggedElement = null;
+
+        // Drag and drop functionality
+        document.querySelectorAll('.snippet').forEach(snippet => {
+            snippet.addEventListener('dragstart', (e) => {
+                draggedElement = snippet;
+                setTimeout(() => {
+                    snippet.style.display = 'none';
+                }, 0);
+            });
+
+            snippet.addEventListener('dragend', (e) => {
+                setTimeout(() => {
+                    draggedElement.style.display = 'block';
+                    draggedElement = null;
+                }, 0);
+            });
+        });
+
+        document.querySelectorAll('.snippet-list').forEach(container => {
+            container.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                const afterElement = getDragAfterElement(container, e.clientY);
+                if (afterElement == null) {
+                    container.appendChild(draggedElement);
+                } else {
+                    container.insertBefore(draggedElement, afterElement);
+                }
+            });
+        });
+
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('.snippet:not([style*="display: none"])')];
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        function checkSolution(containerId, correctOrder) {
+            const snippets = document.querySelectorAll(`#${containerId} .snippet`);
+            let isCorrect = true;
+            snippets.forEach((snippet, index) => {
+                if (parseInt(snippet.getAttribute('data-order')) !== correctOrder[index]) {
+                    isCorrect = false;
+                }
+            });
+
+            const feedback = document.getElementById(`feedback-${containerId.split('-')[2]}`);
+            const feedbackError = document.getElementById(`feedback-error-${containerId.split('-')[2]}`);
+            if (isCorrect) {
+                feedback.style.display = 'block';
+                feedbackError.style.display = 'none';
+            } else {
+                feedbackError.style.display = 'block';
+                feedback.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

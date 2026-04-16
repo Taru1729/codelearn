@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodeMaze - CodeLearn</title>
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  background-color: #0a192f;
+  color: #e6f1ff;
+}
+
+/* HEADER */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  background-color: #112240;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo img {
+  width: 35px;
+}
+
+.logo span {
+  font-family: 'Poppins', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* NAV */
+nav ul {
+  list-style: none;
+  display: flex;
+}
+
+nav ul li a {
+  color: #ccd6f6;
+  margin-left: 25px;
+  text-decoration: none;
+}
+
+nav ul li a:hover {
+  color: #64ffda;
+}
+
+/* MAIN */
+main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 85vh;
+  padding: 20px;
+}
+
+/* GAME CARD */
+.game-card {
+  background-color: #112240;
+  padding: 30px;
+  border-radius: 12px;
+  width: 500px;
+  text-align: center;
+  box-shadow: 0 0 20px rgba(100,255,218,0.2);
+}
+
+/* TITLE */
+h1 {
+  font-family: 'Poppins', sans-serif;
+  color: #64ffda;
+  margin-bottom: 10px;
+}
+
+/* LEVEL */
+.level {
+  color: #8892b0;
+  margin-bottom: 15px;
+}
+
+/* QUESTION BOX */
+.question-box {
+  background-color: #1a365d;
+  padding: 20px;
+  border-radius: 10px;
+  margin: 20px 0;
+  white-space: pre-line;
+}
+
+/* INPUT */
+input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  margin-top: 10px;
+  background-color: #0a192f;
+  color: #e6f1ff;
+}
+
+input:focus {
+  outline: 2px solid #64ffda;
+}
+
+/* BUTTON */
+button {
+  margin-top: 15px;
+  padding: 10px;
+  width: 100%;
+  border: none;
+  border-radius: 6px;
+  background-color: #64ffda;
+  color: #0a192f;
+  cursor: pointer;
+  transition: 0.3s;
+  font-weight: bold;
+}
+
+button:hover {
+  box-shadow: 0 0 10px #64ffda;
+}
+
+/* ERROR */
+.error {
+  color: #ff6b6b;
+  margin-top: 10px;
+}
+
+/* FOOTER */
+footer {
+  text-align: center;
+  padding: 15px;
+  background-color: #112240;
+  color: #8892b0;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header class="toolbar">
+  <div class="logo">
+    <img src="logo.png">
+    <span>CodeLearn</span>
+  </div>
+
+  <nav>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="login.html">Login</a></li>
+      <li><a href="about.html">About</a></li>
+    </ul>
+  </nav>
+</header>
+
+<!-- MAIN -->
+<main>
+  <div class="game-card">
+
+    <h1>CodeMaze 🧩</h1>
+    <p class="level" id="level">Level: 1</p>
+
+    <div class="question-box">
+      <p id="question">Click Start Game to begin</p>
+    </div>
+
+    <form id="answer-form" style="display:none;">
+      <input type="text" id="answer" placeholder="Type your answer..." required>
+      <button type="submit">Submit Answer</button>
+    </form>
+
+    <button id="start-game-button">Start Game</button>
+
+    <p class="error" id="error-message"></p>
+
+  </div>
+</main>
+
+<footer>
+  <p>&copy; 2025 CodeLearn. All rights reserved.</p>
+</footer>
+
+<script>
+// QUESTIONS
+const challenges = [
+  { question: 'What is the output?\n\nprint(3 ** 2)', answer: '9' },
+  { question: 'What will be printed?\n\nx="Code"\ny="Maze"\nprint(x+y)', answer: 'CodeMaze' },
+  { question: 'What is the result?\n\nprint(len([10,20,30,40,50]))', answer: '5' },
+  { question: 'Output?\n\nx=15\ny=4\nprint(x % y)', answer: '3' },
+  { question: 'Result?\n\nprint(True or False)', answer: 'True' }
+];
+
+let currentLevel = 0;
+
+const questionElement = document.getElementById('question');
+const levelElement = document.getElementById('level');
+const answerForm = document.getElementById('answer-form');
+const answerInput = document.getElementById('answer');
+const errorMessage = document.getElementById('error-message');
+const startGameButton = document.getElementById('start-game-button');
+
+// START GAME
+function startGame() {
+  currentLevel = 0;
+  startGameButton.style.display = 'none';
+  answerForm.style.display = 'block';
+  loadQuestion();
+}
+
+// LOAD QUESTION
+function loadQuestion() {
+  if (currentLevel < challenges.length) {
+    questionElement.textContent = challenges[currentLevel].question;
+    levelElement.textContent = "Level: " + (currentLevel + 1);
+    errorMessage.textContent = '';
+    answerInput.value = '';
+  } else {
+    endGame();
+  }
+}
+
+// SUBMIT
+answerForm.addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  const userAnswer = answerInput.value.trim();
+  const correctAnswer = challenges[currentLevel].answer;
+
+  if (userAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
+    currentLevel++;
+    loadQuestion();
+  } else {
+    errorMessage.textContent = '❌ Incorrect! Try again.';
+  }
+});
+
+// END GAME
+function endGame() {
+  questionElement.textContent = '🎉 You completed CodeMaze!';
+  levelElement.textContent = 'Completed ✅';
+  answerForm.style.display = 'none';
+  startGameButton.textContent = 'Play Again';
+  startGameButton.style.display = 'block';
+}
+
+startGameButton.addEventListener('click', startGame);
+</script>
+
+</body>
+</html>

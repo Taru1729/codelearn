@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeLearn - Home</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background-color: #0F172A;
+      color: #F8FAFC;
+    }
+
+    /* HEADER */
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 40px;
+      background-color: #1E293B;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo img {
+      width: 35px;
+    }
+
+    .logo span {
+      font-family: 'Poppins', sans-serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: #F8FAFC;
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+    }
+
+    nav ul li a {
+      color: #94A3B8;
+      margin-left: 25px;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+
+    nav ul li a:hover {
+      color: #6366F1;
+    }
+
+    /* HERO SECTION */
+    .hero {
+      text-align: center;
+      padding: 60px 20px 30px;
+    }
+
+    .hero h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 32px;
+      color: #6366F1;
+      margin-bottom: 10px;
+    }
+
+    .hero p {
+      color: #94A3B8;
+      font-size: 16px;
+    }
+
+    /* GAME GRID */
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+      padding: 40px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .game-box {
+      background-color: #1E293B;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: 0.3s;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+
+    .game-box:hover {
+      transform: translateY(-5px);
+    }
+
+    .game-box img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+    }
+
+    .game-box h3 {
+      margin: 15px;
+      font-size: 18px;
+      color: #F8FAFC;
+    }
+
+    .game-box p {
+      margin: 0 15px 15px;
+      color: #94A3B8;
+      font-size: 14px;
+    }
+
+    .game-box a {
+      display: block;
+      margin: 0 15px 15px;
+      padding: 10px;
+      text-align: center;
+      background-color: #6366F1;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: 0.3s;
+    }
+
+    .game-box a:hover {
+      background-color: #4F46E5;
+    }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 20px;
+      background-color: #1E293B;
+      color: #94A3B8;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header class="toolbar">
+    <div class="logo">
+      <img src="logo.png" alt="CodeLearn Logo">
+      <span>CodeLearn</span>
+    </div>
+
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="login.html">Login</a></li>
+        <li><a href="about.html">About</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <h1>Learn Coding Through Play 🚀</h1>
+    <p>Interactive games designed to make coding fun and engaging</p>
+  </section>
+
+  <!-- GAME GRID -->
+  <section class="game-grid">
+
+    <div class="game-box">
+      <img src="codemazeimg.png">
+      <h3>CodeMaze</h3>
+      <p>Solve logic-based coding problems and level up.</p>
+      <a href="codemaze.html">Play Now</a>
+    </div>
+
+    <div class="game-box">
+      <img src="codecorteximg.png">
+      <h3>CodeCortex</h3>
+      <p>Guess outputs and sharpen your logic.</p>
+      <a href="codecortex.html">Play Now</a>
+    </div>
+
+    <div class="game-box">
+      <img src="snippetsorterimg.png">
+      <h3>Snippet Sorter</h3>
+      <p>Arrange code into working programs.</p>
+      <a href="snippet_sorter.html">Play Now</a>
+    </div>
+
+    <div class="game-box">
+      <img src="MemoryGameImg.jpg">
+      <h3>Memory Match</h3>
+      <p>Test your coding memory skills.</p>
+      <a href="MemoryGame.html">Play Now</a>
+    </div>
+
+    <div class="game-box">
+      <img src="speedtypingimg.jpeg">
+      <h3>Speed Typing</h3>
+      <p>Improve typing speed with code.</p>
+      <a href="speedtyping.html">Play Now</a>
+    </div>
+
+    <div class="game-box">
+      <img src="logicgateimg.jpeg">
+      <h3>Logic Gate Puzzle</h3>
+      <p>Master AND, OR, NOT gates.</p>
+      <a href="gate.html">Play Now</a>
+    </div>
+
+    <div class="game-box">
+      <img src="tictactoeimg.png">
+      <h3>Tic Tac Toe</h3>
+      <p>Classic game powered by logic.</p>
+      <a href="tictactoe.html">Play Now</a>
+    </div>
+
+    <div class="game-box">
+      <img src="codequestimg.jpeg">
+      <h3>Code Quest</h3>
+      <p>Adventure through coding challenges.</p>
+      <a href="codequest.html">Play Now</a>
+    </div>
+
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>&copy; 2025 CodeLearn. All rights reserved.</p>
+  </footer>
+
+</body>
+</html>

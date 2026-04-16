@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Code Explorer Quest</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #0a0a1a;
+            color: #00ff9d;
+            margin: 0;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .game-container {
+            display: flex;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .game-area {
+            flex: 1;
+            background: #1a1a2e;
+            border: 2px solid #00bfff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 191, 255, 0.3);
+            position: relative;
+            height: 500px;
+        }
+
+        .player {
+            width: 30px;
+            height: 30px;
+            background: #00ff9d;
+            border-radius: 50%;
+            position: absolute;
+            transition: all 0.2s;
+            z-index: 2;
+            box-shadow: 0 0 15px rgba(0, 255, 157, 0.5);
+        }
+
+        .treasure {
+            width: 20px;
+            height: 20px;
+            position: absolute;
+            font-size: 20px;
+            z-index: 1;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .code-challenge {
+            position: absolute;
+            padding: 20px;
+            background: #0d1117;
+            border: 2px solid #00bfff;
+            border-radius: 10px;
+            color: #00ff9d;
+            display: none;
+            z-index: 3;
+            width: 300px;
+            text-align: center;
+        }
+
+        .code-challenge input {
+            width: 80%;
+            padding: 8px;
+            margin: 10px 0;
+            background: #1a1a2e;
+            border: 1px solid #00bfff;
+            color: #00ff9d;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .stats {
+            background: #0d1117;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #00bfff;
+            width: 250px;
+        }
+
+        .stat {
+            margin: 10px 0;
+            font-size: 18px;
+            text-shadow: 0 0 5px rgba(0, 255, 157, 0.3);
+        }
+
+        button {
+            padding: 8px 15px;
+            background: #0d1117;
+            color: #00ff9d;
+            border: 2px solid #00bfff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+
+        button:hover {
+            background: #00bfff;
+            color: #0d1117;
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.5);
+        }
+
+        .obstacle {
+            position: absolute;
+            background: #ff3864;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(255, 56, 100, 0.5);
+        }
+
+        .message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1a1a2e;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #00bfff;
+            display: none;
+            z-index: 4;
+        }
+
+        .hint-text {
+            font-size: 14px;
+            color: #00bfff;
+            margin-top: 10px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-area" id="gameArea">
+            <div class="player" id="player"></div>
+        </div>
+        <div class="stats">
+            <h2>Code Explorer Quest</h2>
+            <div class="stat">Level: <span id="level">1</span></div>
+            <div class="stat">Score: <span id="score">0</span></div>
+            <div class="stat">Treasures: <span id="treasures">0</span>/5</div>
+            <div class="stat">Energy: <span id="energy">100</span></div>
+            <button onclick="resetGame()">New Game</button>
+            <button onclick="showHelp()">Help</button>
+        </div>
+    </div>
+    <div class="code-challenge" id="challenge"></div>
+    <div class="message" id="message"></div>
+
+    <script>
+        const player = document.getElementById('player');
+        const gameArea = document.getElementById('gameArea');
+        const challenge = document.getElementById('challenge');
+        const message = document.getElementById('message');
+
+        let playerX = 50;
+        let playerY = 50;
+        let score = 0;
+        let energy = 100;
+        let treasuresFound = 0;
+        let level = 1;
+
+        const challenges = {
+            1: [ // Level 1 - Basic concepts
+                {
+                    question: "What prints output to console? console.___('hello')",
+                    answer: "log",
+                    hint: "Think of logging information"
+                },
+                {
+                    question: "What declares a variable? ___ x = 5;",
+                    answer: "let",
+                    hint: "Modern way to declare variables"
+                },
+                {
+                    question: "What symbol ends a statement? x = 5___",
+                    answer: ";",
+                    hint: "Every statement ends with this"
+                },
+                {
+                    question: "What symbol checks equality? if (x ___ 5)",
+                    answer: "==",
+                    hint: "Double equ.... for comparison"
+                },
+                {
+                    question: "What loops through arrays? for (let item ___ array)",
+                    answer: "of",
+                    hint: "for...of loop"
+                }
+            ],
+            2: [ // Level 2 - Basic operations
+                {
+                    question: "What adds two numbers? 5 ___ 3",
+                    answer: "+",
+                    hint: "Basic math operator"
+                },
+                {
+                    question: "What checks if a is greater than b? if (a ___ b)",
+                    answer: ">",
+                    hint: "Greater than symbol"
+                },
+                {
+                    question: "What starts a comment? ___ This is a comment",
+                    answer: "//",
+                    hint: "Two forward sla...."
+                },
+                {
+                    question: "What adds to an array? arr.___(item)",
+                    answer: "push",
+                    hint: "Adds to the end"
+                },
+                {
+                    question: "What gets first array item? array[___]",
+                    answer: "0",
+                    hint: "Arrays start at zeeee r ooooo"
+                }
+            ],
+            3: [ // Level 3 - Functions and objects
+                {
+                    question: " What is the output of 3 + ''3''? ",
+                    answer: "33",
+                    hint: "String concatenation"
+                },
+                {
+                    question: "What symbol is used to access object properties? obj.___",
+                    answer: ". ",
+                    hint: "A single DOT"
+                },
+                {
+                    question: "What combines conditions? if (a ___ b)",
+                    answer: "&&",
+                    hint: "Logical AND"
+                },
+                {
+                    question: "What returns from function? ___ value;",
+                    answer: "return",
+                    hint: "Sends back a value"
+                },
+                {
+                    question: "What creates an object? ___ obj = {}",
+                    answer: "let",
+                    hint: "Variable declaration"
+                },
+                {
+                    question: "What closes an HTML tag? <div>Hello</___>",
+                    answer: "<div>",
+                    hint: "Same as opening tag"
+                }
+            ],
+            4: [ // Level 4 - Conditionals
+                {
+                    question: "What starts an if statement? ___ (condition)",
+                    answer: "if",
+                    hint: "Basic conditional"
+                },
+                {
+                    question: "What checks multiple conditions? ___ (x > 5)",
+                    answer: "else if",
+                    hint: "Follows an if"
+                },
+                {
+                    question: "What does !false evaluate to?",
+                    answer: "true",
+                    hint: "Not False"
+                },
+                {
+                    question: "What is true + true in JavaScript?",
+                    answer: "2",
+                    hint: "Booleans become numbers"
+                },
+                {
+                    question: "What negates a condition? if (___ condition)",
+                    answer: "!",
+                    hint: "Exclamation mark"
+                },
+                {
+                    question: " What is the shortcut for x = x + 1?",
+                    answer: "x++",
+                    hint: "Double plus"
+                }
+
+            ],
+            5: [ // Level 5 - DOM basics
+                {
+                    question: "What network device forwards packets?",
+                    answer: "router",
+                    hint: "Connects subnets"
+                },
+                {
+                    question: "What provides secure remote access?",
+                    answer: "VPN",
+                    hint: "Virtual Private Network"
+                },
+                {
+                    question: "What listens for clicks? element.___('click', fn)",
+                    answer: "addEventListener",
+                    hint: "Event handling method"
+                },
+                {
+                    question: " What SQL clause filters results?",
+                    answer: "where",
+                    hint: "Conditional"
+                },
+                {
+                    question: "What gets element by ID? document.___('id')",
+                    answer: "getElementById",
+                    hint: "Gets by ID"
+                },
+                {
+                    question: "What command lists files?",
+                    answer: "ls",
+                    hint: "Short for list"
+                }
+            ]
+        };
+
+        function createTreasure() {
+            const treasure = document.createElement('div');
+            treasure.className = 'treasure';
+            treasure.innerHTML = '💎';
+            
+            let validPosition = false;
+            let attempts = 0;
+            const maxAttempts = 50;
+            
+            while (!validPosition && attempts < maxAttempts) {
+                const left = Math.random() * (gameArea.offsetWidth - 20);
+                const top = Math.random() * (gameArea.offsetHeight - 20);
+                
+                const treasureRect = {
+                    left: left,
+                    right: left + 20,
+                    top: top,
+                    bottom: top + 20
+                };
+                
+                let hasCollision = false;
+                document.querySelectorAll('.obstacle').forEach(obstacle => {
+                    const obstacleRect = obstacle.getBoundingClientRect();
+                    if (isColliding(treasureRect, obstacleRect)) {
+                        hasCollision = true;
+                    }
+                });
+                
+                if (!hasCollision) {
+                    treasure.style.left = left + 'px';
+                    treasure.style.top = top + 'px';
+                    validPosition = true;
+                }
+                
+                attempts++;
+            }
+            
+            if (validPosition) {
+                gameArea.appendChild(treasure);
+            } else {
+                setTimeout(createTreasure, 100);
+            }
+        }
+
+        function createObstacle() {
+            const obstacle = document.createElement('div');
+            obstacle.className = 'obstacle';
+            const width = Math.random() * 100 + 50;
+            const height = Math.random() * 100 + 50;
+            obstacle.style.width = width + 'px';
+            obstacle.style.height = height + 'px';
+            obstacle.style.left = Math.random() * (gameArea.offsetWidth - width) + 'px';
+            obstacle.style.top = Math.random() * (gameArea.offsetHeight - height) + 'px';
+            gameArea.appendChild(obstacle);
+        }
+
+        function movePlayer(e) {
+            if (energy <= 0 || challenge.style.display === 'block') return;
+            
+            const speed = 5;
+            const bounds = gameArea.getBoundingClientRect();
+            
+            switch(e.key) {
+                case 'ArrowLeft':
+                    playerX = Math.max(0, playerX - speed);
+                    break;
+                case 'ArrowRight':
+                    playerX = Math.min(bounds.width - 30, playerX + speed);
+                    break;
+                case 'ArrowUp':
+                    playerY = Math.max(0, playerY - speed);
+                    break;
+                case 'ArrowDown':
+                    playerY = Math.min(bounds.height - 30, playerY + speed);
+                    break;
+            }
+
+            player.style.left = playerX + 'px';
+            player.style.top = playerY + 'px';
+
+            checkCollisions();
+            updateEnergy();
+        }
+
+        function checkCollisions() {
+            const playerRect = player.getBoundingClientRect();
+            
+            document.querySelectorAll('.treasure').forEach(treasure => {
+                const treasureRect = treasure.getBoundingClientRect();
+                if (isColliding(playerRect, treasureRect)) {
+                    treasure.remove();
+                    showChallenge();
+                }
+            });
+
+            document.querySelectorAll('.obstacle').forEach(obstacle => {
+                const obstacleRect = obstacle.getBoundingClientRect();
+                if (isColliding(playerRect, obstacleRect)) {
+                    energy = Math.max(0, energy - 5);
+                    updateStats();
+                    showMessage('Ouch! Hit an obstacle! -10 energy', 'red');
+                }
+            });
+        }
+
+        function isColliding(rect1, rect2) {
+            return !(rect1.right < rect2.left ||
+                    rect1.left > rect2.right ||
+                    rect1.bottom < rect2.top ||
+                    rect1.top > rect2.bottom);
+        }
+
+        function showChallenge() {
+            const levelChallenges = challenges[level];
+            const currentChallenge = levelChallenges[Math.floor(Math.random() * levelChallenges.length)];
+            challenge.innerHTML = `
+                <h3>${currentChallenge.question}</h3>
+                <input type="text" id="answer" placeholder="Type your answer" autocomplete="off">
+                <button onclick="checkAnswer('${currentChallenge.answer}')">Submit</button>
+                <div class="hint-text">💡 Hint: ${currentChallenge.hint}</div>
+            `;
+            challenge.style.display = 'block';
+            challenge.style.left = '50%';
+            challenge.style.top = '50%';
+            challenge.style.transform = 'translate(-50%, -50%)';
+            document.getElementById('answer').focus();
+        }
+
+        function checkAnswer(correct) {
+            const userAnswer = document.getElementById('answer').value.toLowerCase();
+            if (userAnswer === correct.toLowerCase()) {
+                score += 100;
+                treasuresFound++;
+                updateStats();
+                challenge.style.display = 'none';
+                showMessage('Correct! +100 points! 🎉', 'green');
+                
+                if (treasuresFound === 5) {
+                    levelUp();
+                }
+            } else {
+                energy = Math.max(0, energy - 5);
+                updateStats();
+                showMessage('Try again! -5 energy 😅', 'red');
+            }
+        }
+
+        function levelUp() {
+            if (level >= 5) {
+                showMessage(`🎉 Congratulations! You've completed all 5 levels! Final Score: ${score}`, 'green');
+                setTimeout(() => {
+                    const playAgain = confirm('You beat the game! Want to play again?');
+                    if (playAgain) {
+                        resetGame();
+                    }
+                }, 1000);
+                return;
+            }
+            
+            level++;
+            treasuresFound = 0;
+            energy = 100;
+            updateStats();
+            resetLevel();
+            showMessage(`Level ${level} Unlocked! 🎉 Energy restored!`, 'green');
+            
+            const levelMessages = {
+                2: "Level 2: More obstacles, stay focused!",
+                3: "Level 3: Getting tougher! Watch your path!",
+                4: "Level 4: Expert territory! Be strategic!",
+                5: "Final Level: The ultimate challenge!"
+            };
+            
+            if (levelMessages[level]) {
+                setTimeout(() => showMessage(levelMessages[level], 'green'), 2000);
+            }
+        }
+
+        function resetLevel() {
+            document.querySelectorAll('.treasure, .obstacle').forEach(el => el.remove());
+            
+            const levelConfig = {
+                1: { obstacles: 3, treasures: 5, energyDrain: 0.1 },
+                2: { obstacles: 5, treasures: 5, energyDrain: 0.1 },
+                3: { obstacles: 6, treasures: 5, energyDrain: 0.1 },
+                4: { obstacles: 6, treasures: 5, energyDrain: 0.1 },
+                5: { obstacles: 6, treasures: 5, energyDrain: 0.1 }
+            };
+
+            const config = levelConfig[level];
+            
+            for(let i = 0; i < config.obstacles; i++) {
+                createObstacle();
+            }
+            
+            for(let i = 0; i < config.treasures; i++) {
+                createTreasure();
+            }
+        }
+
+        function updateEnergy() {
+            const energyDrain = 0.1 + (level - 1) * 0.01;
+            energy = Math.max(0, energy - energyDrain);
+            updateStats();
+            
+            if (energy <= 0) {
+                showMessage('Game Over! Out of energy! 😔', 'red');
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('energy').textContent = Math.round(energy);
+            document.getElementById('treasures').textContent = treasuresFound;
+            document.getElementById('level').textContent = level;
+        }
+
+        function showMessage(text, color) {
+            message.textContent = text;
+            message.style.color = color === 'red' ? '#ff3864' : '#00ff9d';
+            message.style.display = 'block';
+            setTimeout(() => message.style.display = 'none', 2000);
+        }
+
+        function showHelp() {
+            showMessage(`Use arrow keys to move. Collect 💎, avoid red obstacles. Answer coding questions to progress!`, 'green');
+        }
+
+        function resetGame() {
+            playerX = 50;
+            playerY = 50;
+            player.style.left = playerX + 'px';
+            player.style.top = playerY + 'px';
+            score = 0;
+            energy = 100;
+            treasuresFound = 0;
+            level = 1;
+            challenge.style.display = 'none';
+            resetLevel();
+            updateStats();
+            showMessage('New game started! Good luck! 🚀', 'green');
+        }
+
+        document.addEventListener('keydown', movePlayer);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && challenge.style.display === 'block') {
+                checkAnswer(document.querySelector('#challenge button').onclick.toString().match(/'([^']+)'/)[1]);
+            }
+        });
+
+        resetGame();
+    </script>
+</body>
+</html>
